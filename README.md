@@ -94,6 +94,22 @@ Status is written to `build/.resume-check.json`.
 3. Start from `example_resume.tex`: keep the preamble, replace the content.
 4. Run `--autofit` once. Re-run it whenever you add or cut content.
 
+### Vendoring instead of copying
+
+To track this repo rather than fork it, add it as a submodule and point the harness at
+your project:
+
+```bash
+git submodule add https://github.com/JEFF7712/resume-agent vendor/resume-agent
+export RESUME_PROJECT_ROOT="$PWD"     # also set it in your hook config
+python3 vendor/resume-agent/hooks/resume_layout.py resume.tex --autofit
+```
+
+`RESUME_PROJECT_ROOT` tells the harness where `build/`, `resumestyle.sty` and your resume
+sources live. Without it, a vendored copy resolves those against itself. Keep your own
+`resumestyle.sty` at your project root: the layout is meant to be customized, the code is
+what you want to share.
+
 Writing a section uses `\resumesection[<gap in pt>]{Title}`, never `\vspace{...}\section{...}`.
 
 ## Density, briefly

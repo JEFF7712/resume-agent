@@ -13,7 +13,12 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from shutil import which
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+# The project being checked. Defaults to this repo, but when the harness is
+# vendored (git submodule, etc.) the consuming project sets RESUME_PROJECT_ROOT
+# so that build/, resumestyle.sty and the resume sources resolve against it
+# rather than against the vendored copy.
+REPO_ROOT = Path(os.environ.get("RESUME_PROJECT_ROOT") or Path(__file__).resolve().parents[1])
+REPO_ROOT = REPO_ROOT.expanduser().resolve()
 BUILD_DIR = REPO_ROOT / "build"
 STATUS_PATH = BUILD_DIR / ".resume-check.json"
 

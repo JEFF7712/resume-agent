@@ -1,0 +1,11 @@
+resume-agent
+Copyright (c) 2026 Ramrupan Sunderapandyan
+Licensed under the MIT License. See LICENSE.
+
+Third-party attribution
+-----------------------
+
+The LaTeX resume layout in `resumestyle.sty` derives from Jake Gutierrez's
+resume template (https://github.com/jakegut/resume), itself based on
+sb2nov's resume template (https://github.com/sb2nov/resume). Both are
+MIT licensed.

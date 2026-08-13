@@ -120,6 +120,8 @@ uv run ruff check .
 
 ## License
 
-MIT. The layout in `resumestyle.sty` derives from
+MIT, see [LICENSE](LICENSE).
+
+The layout in `resumestyle.sty` derives from
 [jakegut/resume](https://github.com/jakegut/resume), based on
-[sb2nov/resume](https://github.com/sb2nov/resume), both MIT.
+[sb2nov/resume](https://github.com/sb2nov/resume), both MIT. See [NOTICE](NOTICE).

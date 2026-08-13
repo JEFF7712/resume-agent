@@ -32,6 +32,8 @@
 \fancyfoot{}
 \renewcommand{\headrulewidth}{0pt}
 \renewcommand{\footrulewidth}{0pt}
+% fancyhdr warns if footskip is 0 even when the footer is empty.
+\setlength{\footskip}{5pt}
 
 \addtolength{\oddsidemargin}{-0.6in}
 \addtolength{\evensidemargin}{-0.5in}
@@ -80,7 +82,7 @@
 %-------------------------
 
 \titleformat{\section}{
-  \rgap{\rgapSectionRuleAbove}\scshape\raggedright\large\bfseries
+  \rgap{\rgapSectionRuleAbove}\scshape\raggedright\large
 }{}{0em}{}[\color{black}\titlerule \rgap{\rgapSectionRuleBelow}]
 
 % \resumesection[<gap in pt>]{<title>} -- replaces "\vspace{-15pt}\section{...}"

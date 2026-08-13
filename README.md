@@ -83,7 +83,7 @@ touching spacing.
 | --- | --- | --- |
 | Claude Code | `.claude/settings.json` | `PostToolUse` on `Edit`/`Write`/`MultiEdit` |
 | Cursor | `.cursor/hooks.json` | `afterFileEdit`, `postToolUse`, `stop` follow-up |
-| Codex | `.codex/hooks.json` (+ `hooks = true` in `.codex/config.toml`) | `PostToolUse` on `apply_patch`/`Edit`/`Write` |
+| Codex | `.codex/hooks.json` and `.codex/config.toml` | `PostToolUse` on `apply_patch`/`Edit`/`Write` |
 
 Status is written to `build/.resume-check.json`.
 
@@ -132,6 +132,7 @@ The flake provides all of them.
 ```bash
 uv run pytest          # unit + integration
 uv run ruff check .
+uv run pyright
 ```
 
 ## License

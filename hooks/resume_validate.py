@@ -96,7 +96,7 @@ def compile_tex(tex: Path) -> tuple[Path, str]:
         f"-output-directory={out_dir}",
         tex.name,
     ]
-    # Let packet resumes under applications/ find resumestyle.sty at the repo root.
+    # Nested .tex files still need to find resumestyle.sty at the repo root.
     env = dict(os.environ, TEXINPUTS=f"{REPO_ROOT}:{os.environ.get('TEXINPUTS', '')}")
     proc = subprocess.run(cmd, cwd=work_dir, text=True, capture_output=True, check=False, env=env)
     pdf = out_dir / f"{tex.stem}.pdf"
@@ -221,7 +221,7 @@ def validate_tex(
                 max_bottom_gap_in=max_gap,
                 message=(
                     f"{pdf.name} has {pages} pages; resumes must be exactly 1 page. "
-                    "Tighten spacing, shorten bullets, or drop low-value lines."
+                    "Run `--autofit` first; if that reports content_too_long, cut content."
                 ),
                 compile_log_tail=compile_log_tail,
             )
@@ -237,8 +237,8 @@ def validate_tex(
                 max_bottom_gap_in=max_gap,
                 message=(
                     f"{pdf.name} is 1 page but under-filled: bottom gap {gap:.2f}in "
-                    f"(max {max_gap:.2f}in). Add substance or restore spacing so content "
-                    "reaches near the bottom without spilling to page 2."
+                    f"(max {max_gap:.2f}in). Run `--autofit` first; only add real content "
+                    "if it reports content_too_short."
                 ),
                 compile_log_tail=compile_log_tail,
             )

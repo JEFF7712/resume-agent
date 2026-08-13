@@ -11,7 +11,7 @@
 \documentclass[letterpaper,11pt]{article}
 \usepackage{resumestyle}
 
-\setresumedensity{0.270}
+\setresumedensity{0.490}
 
 \begin{document}
 
@@ -30,6 +30,7 @@
      \resumeSubheading
       {Oregon State University}{September 2021 -- June 2025}
       {B.S. in Computer Science, Minor in Statistics \textbar{} GPA: 3.81}{Corvallis, OR}
+     \classesList{Relevant coursework:}{ Distributed Systems,}{ Compilers,}{ Operating Systems}
   \resumeSubHeadingListEnd
 
 \resumesection[-14]{Experience}
@@ -37,6 +38,7 @@
     \resumeSubheading
       {Backend Engineer}{July 2025 -- Present}
       {Northwind Systems}{Portland, OR}
+    \resumeSubSubheading{Streaming ingestion team}{July 2025 -- Present}
         \resumeItemListStart
             \resumeItem{Designed and shipped a sharded ingestion service in Go handling \textbf{40k} events/sec, cutting p99 write latency from 380ms to 45ms.}
             \resumeItem{Replaced a nightly batch reconciliation job with an incremental change-data-capture pipeline, reducing data staleness from 24 hours to under 2 minutes.}
@@ -61,7 +63,7 @@
     \resumeSubHeadingListStart
         \resumeProjectHeading{\textbf{\href{https://example.com}{\underline{ledgerlite}}}: Embedded Append-Only Store}{February 2025 -- Present}
             \resumeItemListStart
-                \resumeItem{Wrote a crash-safe embedded key-value store in Rust with write-ahead logging and \textbf{O(1)} amortized appends, validated by property-based tests.}
+                \resumeSubItem{Wrote a crash-safe embedded key-value store in Rust with write-ahead logging and \textbf{O(1)} amortized appends, validated by property-based tests.}
                 \resumeItem{Sustains \textbf{180k} writes/sec on commodity NVMe while guaranteeing durability under simulated power loss.}
             \resumeItemListEnd
         \resumeProjectHeading{\textbf{Distributed Build Cache} $|$ Go/gRPC}{October 2024}

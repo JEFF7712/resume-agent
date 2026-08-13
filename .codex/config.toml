@@ -1,0 +1,5 @@
+# Project-local Codex config. Hooks are on by default; pinning them here keeps
+# the resume layout hook running even if a user disabled hooks globally.
+# Codex loads this layer only when the project is trusted.
+[features]
+hooks = true

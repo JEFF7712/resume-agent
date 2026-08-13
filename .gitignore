@@ -1,0 +1,14 @@
+# LaTeX build artifacts (regenerate with `nix run .`)
+build/
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.pdf
+
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.direnv/

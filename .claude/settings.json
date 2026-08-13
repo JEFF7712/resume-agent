@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 hooks/resume_after_edit.py",
+            "timeout": 120,
+            "statusMessage": "Checking resume layout..."
+          }
+        ]
+      }
+    ]
+  }
+}

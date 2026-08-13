@@ -1,0 +1,18 @@
+{
+  "description": "Rebuild and validate resume.tex variants after edits",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "apply_patch|Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 hooks/resume_after_edit.py",
+            "timeout": 120,
+            "statusMessage": "Checking resume layout..."
+          }
+        ]
+      }
+    ]
+  }
+}

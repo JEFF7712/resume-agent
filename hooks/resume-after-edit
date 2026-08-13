@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Thin wrapper so Cursor/Claude/Codex configs can invoke a stable path.
+set -euo pipefail
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+if command -v python3 >/dev/null 2>&1; then
+  exec python3 "$ROOT/hooks/resume_after_edit.py"
+fi
+if command -v python >/dev/null 2>&1; then
+  exec python "$ROOT/hooks/resume_after_edit.py"
+fi
+echo "resume-after-edit: python3 not found on PATH" >&2
+exit 1

@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "hooks": {
+    "afterFileEdit": [
+      {
+        "command": "hooks/resume-after-edit",
+        "timeout": 120
+      }
+    ],
+    "postToolUse": [
+      {
+        "command": "hooks/resume-after-edit",
+        "matcher": "Write|StrReplace",
+        "timeout": 120
+      }
+    ],
+    "stop": [
+      {
+        "command": "hooks/resume-after-edit",
+        "timeout": 10,
+        "loop_limit": 3
+      }
+    ]
+  }
+}

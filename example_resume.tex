@@ -1,0 +1,83 @@
+%-------------------------
+% Example resume for the resume-agent harness.
+% The person and every entry below are fictional; this file exists so the
+% harness has something to compile, validate and demo against.
+%
+% Layout lives in resumestyle.sty. Edit content only.
+% \setresumedensity is owned by the autofit solver:
+%   python3 hooks/resume_layout.py example_resume.tex --autofit
+%------------------------
+
+\documentclass[letterpaper,11pt]{article}
+\usepackage{resumestyle}
+
+\setresumedensity{0.270}
+
+\begin{document}
+
+\resumeheader{alex rivera}{Portland, Oregon}{%
+    \resumecontact{+1 555-0142}
+    \resumesep
+    \resumecontact{\href{mailto:alex@example.com}{\underline{alex@example.com}}}
+    \resumesep
+    \resumecontact{\href{https://linkedin.com/in/example}{\underline{linkedin.com/in/example}}}
+    \resumesep
+    \resumecontact{\href{https://example.com}{\underline{example.com}}}
+}
+
+\resumesection{Education}
+  \resumeSubHeadingListStart
+     \resumeSubheading
+      {Oregon State University}{September 2021 -- June 2025}
+      {B.S. in Computer Science, Minor in Statistics \textbar{} GPA: 3.81}{Corvallis, OR}
+  \resumeSubHeadingListEnd
+
+\resumesection[-14]{Experience}
+  \resumeSubHeadingListStart
+    \resumeSubheading
+      {Backend Engineer}{July 2025 -- Present}
+      {Northwind Systems}{Portland, OR}
+        \resumeItemListStart
+            \resumeItem{Designed and shipped a sharded ingestion service in Go handling \textbf{40k} events/sec, cutting p99 write latency from 380ms to 45ms.}
+            \resumeItem{Replaced a nightly batch reconciliation job with an incremental change-data-capture pipeline, reducing data staleness from 24 hours to under 2 minutes.}
+            \resumeItem{Introduced contract tests across six internal services, eliminating the integration failures that had blocked roughly one deploy per week.}
+        \resumeItemListEnd
+    \resumeSubheading
+      {Software Engineering Intern}{June 2024 -- September 2024}
+      {Cascade Analytics}{Seattle, WA}
+        \resumeItemListStart
+            \resumeItem{Built a query planner cache for an internal analytics API, cutting median dashboard load time by \textbf{62\%} across 200+ daily users.}
+            \resumeItem{Instrumented the request path with structured tracing, surfacing a connection-pool exhaustion bug that had caused recurring weekly outages.}
+        \resumeItemListEnd
+    \resumeSubheading
+      {Undergraduate Research Assistant}{January 2023 -- May 2024}
+      {OSU Distributed Systems Lab}{Corvallis, OR}
+      \resumeItemListStart
+        \resumeItem{Implemented and benchmarked three consensus protocols in Rust, contributing reproducible harnesses used in a published workshop paper.}
+      \resumeItemListEnd
+  \resumeSubHeadingListEnd
+
+\resumesection[-16]{Projects}
+    \resumeSubHeadingListStart
+        \resumeProjectHeading{\textbf{\href{https://example.com}{\underline{ledgerlite}}}: Embedded Append-Only Store}{February 2025 -- Present}
+            \resumeItemListStart
+                \resumeItem{Wrote a crash-safe embedded key-value store in Rust with write-ahead logging and \textbf{O(1)} amortized appends, validated by property-based tests.}
+                \resumeItem{Sustains \textbf{180k} writes/sec on commodity NVMe while guaranteeing durability under simulated power loss.}
+            \resumeItemListEnd
+        \resumeProjectHeading{\textbf{Distributed Build Cache} $|$ Go/gRPC}{October 2024}
+            \resumeItemListStart
+                \resumeItem{Built a content-addressed build cache with a gRPC API and S3 backing, cutting median CI build time for a 400-module monorepo from 11 minutes to \textbf{90 seconds}.}
+            \resumeItemListEnd
+        \resumeProjectHeading{\textbf{Home Lab Kubernetes Cluster}}{March 2024 -- Present}
+            \resumeItemListStart
+                \resumeItem{Operate a three-node bare-metal cluster with GitOps deployment and full observability, hosting personal services behind an authenticating reverse proxy.}
+            \resumeItemListEnd
+    \resumeSubHeadingListEnd
+
+\resumesection[-20]{Skills}
+\resumeSkillsListStart
+    \resumeItem{\textbf{Languages:} Go, Rust, Python, TypeScript, SQL, Bash}
+    \resumeItem{\textbf{Systems:} PostgreSQL, Kafka, gRPC, Redis, distributed consensus}
+    \resumeItem{\textbf{Infra:} Kubernetes, Docker, Terraform, GitHub Actions, Prometheus}
+\resumeSkillsListEnd
+\end{document}

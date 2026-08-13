@@ -1,0 +1,160 @@
+%-------------------------
+% resumestyle.sty
+% Shared layout for all resume variants.
+% Based on Jake Gutierrez / sb2nov resume templates (MIT).
+%
+% Every vertical-spacing constant lives here and is scaled by \resumedensity.
+% Agents edit content in the .tex body; the autofit solver owns \resumedensity.
+%-------------------------
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{resumestyle}[2026/08/13 Shared resume layout]
+
+\RequirePackage{latexsym}
+\RequirePackage[empty]{fullpage}
+\RequirePackage{titlesec}
+\RequirePackage{marvosym}
+\RequirePackage[usenames,dvipsnames]{color}
+\RequirePackage{verbatim}
+\RequirePackage{enumitem}
+\RequirePackage[hidelinks]{hyperref}
+\RequirePackage{fancyhdr}
+\RequirePackage[english]{babel}
+\RequirePackage{tabularx}
+\RequirePackage{fontawesome5}
+\RequirePackage{multicol}
+\setlength{\multicolsep}{-3.0pt}
+\setlength{\columnsep}{-1pt}
+\input{glyphtounicode}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\addtolength{\oddsidemargin}{-0.6in}
+\addtolength{\evensidemargin}{-0.5in}
+\addtolength{\textwidth}{1.19in}
+\addtolength{\topmargin}{-.7in}
+\addtolength{\textheight}{1.4in}
+
+\urlstyle{same}
+
+\raggedbottom
+\raggedright
+\setlength{\tabcolsep}{0in}
+
+\pdfgentounicode=1
+
+%-------------------------
+% Density knob
+%
+% \resumedensity scales every negative gap below. 1.0 reproduces the original
+% hand-tuned layout. >1.0 tightens (gaps go more negative), <1.0 loosens.
+% The autofit solver rewrites the \setresumedensity line in each .tex.
+%-------------------------
+
+\newcommand{\resumedensity}{1.0}
+\newcommand{\setresumedensity}[1]{\renewcommand{\resumedensity}{#1}}
+
+% Scaled vertical gap; argument is a bare number of points.
+\newcommand{\rgap}[1]{\vspace{\resumedensity\dimexpr #1pt\relax}}
+
+% Named layout constants (points). Change these, never raw \vspace in a body.
+\newcommand{\rgapSectionRuleAbove}{-4}
+\newcommand{\rgapSectionRuleBelow}{-5}
+\newcommand{\rgapItem}{-2}
+\newcommand{\rgapSubheadingAbove}{-2}
+\newcommand{\rgapSubheadingBelow}{-7}
+\newcommand{\rgapSubSubheading}{-7}
+\newcommand{\rgapProjectAbove}{-6}
+\newcommand{\rgapProjectBelow}{-7}
+\newcommand{\rgapSubItem}{-4}
+\newcommand{\rgapItemListEnd}{-5}
+\newcommand{\rgapSectionDefault}{-15}
+\newcommand{\rgapSkillsItemSep}{-1}
+
+%-------------------------
+% Sectioning
+%-------------------------
+
+\titleformat{\section}{
+  \rgap{\rgapSectionRuleAbove}\scshape\raggedright\large\bfseries
+}{}{0em}{}[\color{black}\titlerule \rgap{\rgapSectionRuleBelow}]
+
+% \resumesection[<gap in pt>]{<title>} -- replaces "\vspace{-15pt}\section{...}"
+\newcommand{\resumesection}[2][\rgapSectionDefault]{\rgap{#1}\section{#2}}
+
+%-------------------------
+% Header
+%-------------------------
+
+% Trailing \space is required: \resumesep is a control word, so TeX would
+% otherwise swallow the newline separating it from the next contact item.
+\newcommand{\resumesep}{\,\textbar{}\,\space}
+\newcommand{\resumecontact}[1]{\raisebox{-0.2\height}{#1}}
+
+% \resumeheader{<name>}{<location>}{<contact line>}
+\newcommand{\resumeheader}[3]{%
+  \begin{center}
+    {\Huge \scshape #1}\\[1pt]
+    #2\\[1pt]
+    \small
+    #3
+  \end{center}
+}
+
+%-------------------------
+% Entry macros
+%-------------------------
+
+\newcommand{\resumeItem}[1]{
+  \item\small{
+    {#1 \rgap{\rgapItem}}
+  }
+}
+
+\newcommand{\classesList}[4]{
+    \item\small{
+        {#1 #2 #3 #4 \rgap{\rgapItem}}
+  }
+}
+
+\newcommand{\resumeSubheading}[4]{
+  \rgap{\rgapSubheadingAbove}\item
+    \begin{tabular*}{1.0\textwidth}[t]{l@{\extracolsep{\fill}}r}
+      \textbf{#1} & \textbf{\small #2} \\
+      \textit{\small#3} & \textit{\small #4} \\
+    \end{tabular*}\rgap{\rgapSubheadingBelow}
+}
+
+\newcommand{\resumeSubSubheading}[2]{
+    \item
+    \begin{tabular*}{0.97\textwidth}{l@{\extracolsep{\fill}}r}
+      \textit{\small#1} & \textit{\small #2} \\
+    \end{tabular*}\rgap{\rgapSubSubheading}
+}
+
+\newcommand{\resumeProjectHeading}[2]{
+    \rgap{\rgapProjectAbove}\item
+    \begin{tabular*}{1.0\textwidth}{l@{\extracolsep{\fill}}r}
+      \small#1 & \textbf{\small #2}\\
+    \end{tabular*}\rgap{\rgapProjectBelow}
+}
+
+\newcommand{\resumeSubItem}[1]{\resumeItem{#1}\rgap{\rgapSubItem}}
+
+\renewcommand\labelitemi{$\vcenter{\hbox{\tiny$\bullet$}}$}
+\renewcommand\labelitemii{$\vcenter{\hbox{\tiny$\bullet$}}$}
+
+\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=0.0in, label={}]}
+\newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
+\newcommand{\resumeItemListStart}{\begin{itemize}}
+\newcommand{\resumeItemListEnd}{\end{itemize}\rgap{\rgapItemListEnd}}
+
+\newcommand{\resumeSkillsListStart}{%
+  \begin{itemize}[leftmargin=0.15in, itemsep=\resumedensity\dimexpr\rgapSkillsItemSep pt\relax]}
+\newcommand{\resumeSkillsListEnd}{\end{itemize}}
+
+\endinput

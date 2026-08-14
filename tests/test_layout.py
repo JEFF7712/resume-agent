@@ -17,6 +17,7 @@ from resume_layout import (
     read_density,
     report,
     text_collisions,
+    uneven_item_gaps_in_lines,
     write_density,
 )
 from resume_validate import validate_tex
@@ -96,6 +97,40 @@ def test_overfull_boxes_parses_log_lines() -> None:
     boxes = overfull_boxes(log)
     assert [b["lines"] for b in boxes] == ["155--157", "20--22"]
     assert boxes[1]["pt"] == pytest.approx(12.5)
+
+
+def _ln(y0: float, y1: float, x0: float, text: str) -> dict:
+    return {
+        "y0": y0,
+        "y1": y1,
+        "x0": x0,
+        "x1": x0 + 200,
+        "mid": (y0 + y1) / 2,
+        "words": text.split(),
+    }
+
+
+def test_uneven_item_gaps_flags_outlier_between_sibling_bullets() -> None:
+    lines = [
+        _ln(0, 10, 40, "• first item line"),
+        _ln(16, 26, 40, "• second item line"),
+        _ln(29, 39, 40, "second item wrap"),
+        _ln(57, 67, 40, "• third item line"),
+        _ln(73, 83, 40, "• fourth item line"),
+    ]
+    gaps = uneven_item_gaps_in_lines(lines)
+    assert gaps, "18pt hole between sibling bullets was not detected"
+    assert "third item" in gaps[0]
+
+
+def test_uneven_item_gaps_ignores_job_heading_between_lists() -> None:
+    lines = [
+        _ln(0, 10, 40, "• last bullet of job one"),
+        _ln(20, 30, 20, "Next Job Title"),
+        _ln(40, 50, 40, "• first bullet of job two"),
+        _ln(56, 66, 40, "• second bullet of job two"),
+    ]
+    assert uneven_item_gaps_in_lines(lines) == []
 
 
 def test_lines_equivalent_uses_body_leading() -> None:
@@ -256,6 +291,7 @@ def test_example_resume_layout_report_passes() -> None:
     assert result["ok"], result["message"]
     assert result["pages"] == 1
     assert not result["collisions"]
+    assert not result["internal_gaps"]
     assert not result["overfull"]
     assert not result["lint"]
 

@@ -21,14 +21,16 @@ makes the bisection below valid.
 from __future__ import annotations
 
 import argparse
+import itertools
 import json
 import os
 import re
 import shutil
+import statistics
 import subprocess
 import sys
 import tempfile
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 HOOKS_DIR = Path(__file__).resolve().parent
@@ -80,6 +82,16 @@ FRAGMENT_MAX_WIDTH_PT = 15.0
 FRAGMENT_HEIGHT_FRAC = 0.7
 COLLISION_LOOKAHEAD = 3
 
+# Consecutive bullets at the same indent should share an item gap. A last line
+# that fills the measure can wrap a trailing space onto a blank extra line,
+# which shows up as ~12pt of extra hole before the next bullet. Section breaks
+# and job headings sit between lists and are ignored.
+BULLET_MARKERS = frozenset({"•", "●", "‣"})
+ITEM_X_TOL_PT = 8.0
+HEADING_INSET_PT = 8.0
+ITEM_GAP_ABS_PT = 12.0
+ITEM_GAP_RATIO = 2.0
+
 
 @dataclass
 class Measurement:
@@ -89,6 +101,7 @@ class Measurement:
     log: str
     collisions: list[str]
     overflow_in: float
+    internal_gaps: list[str] = field(default_factory=list)
 
 
 class LayoutError(RuntimeError):
@@ -157,6 +170,7 @@ def measure(tex: Path, density: float) -> Measurement:
             log=log,
             collisions=text_collisions(pdf),
             overflow_in=overflow_height_inches(pdf) if pages > 1 else 0.0,
+            internal_gaps=uneven_item_gaps(pdf),
         )
 
 
@@ -232,28 +246,17 @@ def _pgm_ink_rows(raw: bytes) -> list[int]:
     ]
 
 
-def text_collisions(pdf: Path) -> list[str]:
-    """Find text lines that vertically overlap each other.
-
-    Over-tight negative spacing does not raise a LaTeX error: headings simply
-    print on top of body text. Page count and bottom gap are both blind to it,
-    so the geometry has to be checked directly.
-    """
+def _pdf_page_chunks(pdf: Path) -> list[str]:
     proc = subprocess.run(
         ["pdftotext", "-bbox", str(pdf), "-"], capture_output=True, text=True, check=False
     )
     if proc.returncode != 0:
         return []
-
-    # Page coordinates restart at every page, so pages must be scanned separately;
-    # pooling them makes unrelated pages look like they overlap.
-    out: list[str] = []
-    for chunk in proc.stdout.split("<page ")[1:]:
-        out.extend(_page_collisions(chunk))
-    return out
+    return proc.stdout.split("<page ")[1:]
 
 
-def _page_collisions(chunk: str) -> list[str]:
+def _page_lines(chunk: str) -> list[dict]:
+    """Cluster pdftotext -bbox words into visual lines, dropping superscripts."""
     words = [
         (float(x0), float(y0), float(x1), float(y1), txt)
         for x0, y0, x1, y1, txt in WORD_RE.findall(chunk)
@@ -261,7 +264,6 @@ def _page_collisions(chunk: str) -> list[str]:
     if not words:
         return []
 
-    # Cluster words into visual lines by their vertical midpoint.
     words.sort(key=lambda w: ((w[1] + w[3]) / 2, w[0]))
     lines: list[dict] = []
     for x0, y0, x1, y1, txt in words:
@@ -277,11 +279,9 @@ def _page_collisions(chunk: str) -> list[str]:
         else:
             lines.append({"y0": y0, "y1": y1, "x0": x0, "x1": x1, "mid": mid, "words": [txt]})
 
-    # Drop superscript/subscript fragments (e.g. the smashed "2" in O(N^2)).
-    # They cluster as their own tiny band and would otherwise read as a collision.
     heights = sorted(ln["y1"] - ln["y0"] for ln in lines)
     median_h = heights[len(heights) // 2] if heights else 0.0
-    lines = [
+    return [
         ln
         for ln in lines
         if not (
@@ -290,9 +290,23 @@ def _page_collisions(chunk: str) -> list[str]:
         )
     ]
 
+
+def text_collisions(pdf: Path) -> list[str]:
+    """Find text lines that vertically overlap each other.
+
+    Over-tight negative spacing does not raise a LaTeX error: headings simply
+    print on top of body text. Page count and bottom gap are both blind to it,
+    so the geometry has to be checked directly.
+    """
+    out: list[str] = []
+    for chunk in _pdf_page_chunks(pdf):
+        out.extend(_collisions_in_lines(_page_lines(chunk)))
+    return out
+
+
+def _collisions_in_lines(lines: list[dict]) -> list[str]:
     out: list[str] = []
     for i, a in enumerate(lines):
-        # A tall heading can reach past its immediate neighbour, so look ahead.
         for b in lines[i + 1 : i + 1 + COLLISION_LOOKAHEAD]:
             overlap = a["y1"] - b["y0"]
             if overlap <= 0:
@@ -305,6 +319,56 @@ def _page_collisions(chunk: str) -> list[str]:
             first = " ".join(a["words"])[:38]
             second = " ".join(b["words"])[:38]
             out.append(f'"{first}" overlaps "{second}" by {overlap:.1f}pt')
+    return out
+
+
+def _is_bullet(ln: dict) -> bool:
+    if not ln["words"]:
+        return False
+    first = ln["words"][0]
+    return first in BULLET_MARKERS or any(first.startswith(m) for m in BULLET_MARKERS)
+
+
+def uneven_item_gaps(pdf: Path) -> list[str]:
+    """Find sibling bullets whose gap is much larger than the typical item gap.
+
+    Page count and bottom-gap checks miss a hole in the middle of a list. The
+    usual cause is a last line that fills the measure, wrapping a trailing space
+    onto a blank extra line before the next \\item.
+    """
+    out: list[str] = []
+    for chunk in _pdf_page_chunks(pdf):
+        out.extend(uneven_item_gaps_in_lines(_page_lines(chunk)))
+    return out
+
+
+def uneven_item_gaps_in_lines(lines: list[dict]) -> list[str]:
+    bullets = [i for i, ln in enumerate(lines) if _is_bullet(ln)]
+    sibling: list[tuple[float, str, str]] = []
+    for a_i, b_i in itertools.pairwise(bullets):
+        a, b = lines[a_i], lines[b_i]
+        if abs(a["x0"] - b["x0"]) > ITEM_X_TOL_PT:
+            continue
+        between = lines[a_i + 1 : b_i]
+        inset = min(a["x0"], b["x0"])
+        if any(ln["x0"] < inset - HEADING_INSET_PT for ln in between):
+            continue
+        prev = lines[b_i - 1]
+        gap = b["y0"] - prev["y1"]
+        sibling.append((gap, " ".join(a["words"]), " ".join(b["words"])))
+    if len(sibling) < 2:
+        return []
+    med = statistics.median(g for g, _, _ in sibling)
+    limit = max(ITEM_GAP_ABS_PT, ITEM_GAP_RATIO * med)
+    out: list[str] = []
+    for gap, prev_t, next_t in sibling:
+        if gap <= limit:
+            continue
+        out.append(
+            f'{gap:.0f}pt between "{prev_t[:40]}" and "{next_t[:40]}" '
+            f"(typical item gap {med:.0f}pt). Shorten the previous bullet so its "
+            "last line is not flush to the margin."
+        )
     return out
 
 
@@ -499,6 +563,17 @@ def report(tex: Path, *, max_gap_in: float = DEFAULT_MAX_BOTTOM_GAP_IN) -> dict:
     else:
         lines.append("  PASS overlap (no colliding text)")
 
+    if m.internal_gaps:
+        lines.append(f"  FAIL item gap: {len(m.internal_gaps)} uneven hole(s) between bullets")
+        for g in m.internal_gaps:
+            lines.append(f"    {g}")
+        lines.append(
+            "    Density cannot fix this. Shorten the previous bullet so the last "
+            "line is not flush to the margin."
+        )
+    else:
+        lines.append("  PASS item gap (even spacing between bullets)")
+
     if boxes:
         lines.append(f"  {len(boxes)} overfull \\hbox (text past the right margin):")
         for b in boxes:
@@ -515,6 +590,7 @@ def report(tex: Path, *, max_gap_in: float = DEFAULT_MAX_BOTTOM_GAP_IN) -> dict:
         "gap_in": round(m.gap_in, 3),
         "overfull": boxes,
         "collisions": m.collisions,
+        "internal_gaps": m.internal_gaps,
         "lint": problems,
         "ok": (
             m.pages == 1
@@ -522,6 +598,7 @@ def report(tex: Path, *, max_gap_in: float = DEFAULT_MAX_BOTTOM_GAP_IN) -> dict:
             and not boxes
             and not problems
             and not m.collisions
+            and not m.internal_gaps
         ),
         "message": "\n".join(lines),
     }

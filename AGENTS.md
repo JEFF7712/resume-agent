@@ -30,6 +30,7 @@ Every edit must end with:
 2. Bottom gap ≤ `0.85in` (override with `RESUME_MAX_BOTTOM_GAP_IN`).
 3. No overlapping text.
 4. No overfull `\hbox`.
+5. No uneven holes between sibling bullets (a flush last line wrapping a blank extra line).
 
 When a check fails:
 
@@ -39,6 +40,7 @@ When a check fails:
    `content_too_long` (cut roughly N body lines) or `content_too_short` (add roughly N lines
    of real content). Never invent experience to fill a page.
 3. Overfull `\hbox` findings are wording problems. Shorten the flagged line.
+4. Uneven item-gap findings are also wording: shorten the previous bullet so its last line is not flush to the margin. Do not insert `\vspace`.
 
 ## Build and Test
 

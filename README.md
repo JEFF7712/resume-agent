@@ -34,6 +34,7 @@ The agent's job shrinks to what it is actually good at: writing good bullets.
 | Exactly 1 page | The usual hard requirement. |
 | Bottom gap ≤ 0.85in | A one-page resume with a 2in empty tail is still a bad resume. |
 | **No overlapping text** | Over-tight spacing makes headings print *on top of* body text. LaTeX reports no error for this, and page count and bottom gap are both blind to it. Detected geometrically from the PDF via `pdftotext -bbox`. |
+| **Even item gaps** | A last line that fills the measure can wrap a trailing space onto a blank extra line, leaving a ~12pt hole between two bullets. Page count and bottom gap miss a hole in the middle of a list. Detected as an outlier vs the typical sibling-bullet gap. Shorten that bullet; do not hand-tune `\vspace`. |
 | **No overfull `\hbox`** | Text running past the right margin, reported with `.tex` line numbers. A wording problem, never a spacing one. |
 | No raw layout commands in a body | Stops the hand-tuning that causes all of the above. |
 

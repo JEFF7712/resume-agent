@@ -203,7 +203,7 @@ def guidance(paths: list[Path], ok: bool) -> tuple[str, bool]:
     Returns the extra message text and whether the source itself is clean; raw
     layout commands in a body are a hard fail even when the page still measures OK.
     """
-    from resume_layout import lint_source, overfull_boxes
+    from resume_layout import lint_source, overfull_boxes, text_collisions, uneven_item_gaps
 
     lines: list[str] = []
     source_clean = True
@@ -220,6 +220,14 @@ def guidance(paths: list[Path], ok: bool) -> tuple[str, bool]:
                     f"- {path.name}:{box['lines']} overfull \\hbox by {pt} "
                     "(text past the right margin; shorten the wording on those lines)"
                 )
+        pdf = REPO_ROOT / "build" / f"{path.stem}.pdf"
+        if pdf.exists():
+            for c in text_collisions(pdf):
+                source_clean = False
+                lines.append(f"- overlap: {c}")
+            for g in uneven_item_gaps(pdf):
+                source_clean = False
+                lines.append(f"- uneven item gap: {g}")
     if not ok:
         names = " ".join(p.name for p in paths)
         lines.append(

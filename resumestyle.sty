@@ -111,16 +111,14 @@
 % Entry macros
 %-------------------------
 
-\newcommand{\resumeItem}[1]{
-  \item\small{
-    {#1 \rgap{\rgapItem}}
-  }
+% \unskip + no space before \rgap: a last line that fills the measure used to
+% wrap that space onto a blank extra line (~12pt hole before the next item).
+\newcommand{\resumeItem}[1]{%
+  \item\small{#1\unskip\rgap{\rgapItem}}%
 }
 
-\newcommand{\classesList}[4]{
-    \item\small{
-        {#1 #2 #3 #4 \rgap{\rgapItem}}
-  }
+\newcommand{\classesList}[4]{%
+  \item\small{#1 #2 #3 #4\unskip\rgap{\rgapItem}}%
 }
 
 \newcommand{\resumeSubheading}[4]{
